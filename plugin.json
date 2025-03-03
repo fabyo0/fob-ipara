@@ -1,0 +1,12 @@
+{
+    "id": "friendsofbotble/fob-ipara",
+    "name": "Ipara",
+    "namespace": "Botble\\Ipara\\",
+    "provider": "Botble\\Ipara\\Providers\\IparaServiceProvider",
+    "author": "Emre Dikmen",
+    "url": "",
+    "version": "1.0.0",
+    "description": "iPara payment gateway for Botble eCommerce system.",
+    "minimum_core_version": "7.4.7",
+    "require": ["botble/payment"]
+}
