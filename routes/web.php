@@ -3,7 +3,6 @@
 use Botble\Ipara\Http\Controllers\IparaController;
 use Illuminate\Support\Facades\Route;
 
-
 Route::middleware(['core'])->group(function () {
     Route::post('payment/ipara/webhook', [IparaController::class, 'webhook'])
         ->name('payments.ipara.webhook');

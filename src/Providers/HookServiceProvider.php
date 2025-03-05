@@ -153,7 +153,8 @@ class HookServiceProvider extends ServiceProvider
                     'orderId' => $orderId,
                     'ORDER_ID' => $orderId,
                     'RESULT' => '1',
-                    'checkout_token' => $checkoutToken,
+                    'checkout_token' => $paymentData['checkout_token'],
+                    'charge_id' => $result['charge_id']
                 ]);
 
                 $failUrl = route('payments.ipara.callback', [
@@ -161,7 +162,8 @@ class HookServiceProvider extends ServiceProvider
                     'orderId' => $orderId,
                     'ORDER_ID' => $orderId,
                     'RESULT' => '0',
-                    'checkout_token' => $checkoutToken,
+                    'checkout_token' => $paymentData['checkout_token'],
+                    'charge_id' => $result['charge_id']
                 ]);
 
                 Log::info('iPara Payment URLs', [
@@ -169,6 +171,7 @@ class HookServiceProvider extends ServiceProvider
                     'failUrl' => $failUrl,
                     'checkout_token' => $request->input('checkout_token'),
                 ]);
+
 
                 echo view('plugins/ipara::ipara', [
                     'publicKey' => $publicKey,

@@ -75,7 +75,7 @@ class IparaController extends BaseController
 
         $orderId = $request->input('orderId') ?? $request->input('ORDER_ID') ?? '';
         $result = $request->input('result') ?? $request->input('RESULT') ?? '';
-        $checkoutToken = $request->input('checkout_token') ?? '';
+        $checkoutToken = $request->input('checkout_token');
 
         $echo = $request->input('ECHO');
         $hash = $request->input('HASH');
@@ -104,7 +104,8 @@ class IparaController extends BaseController
         Log::info('iPara Success Status', ['isSuccess' => $isSuccess, 'result' => $result]);
 
         if ($isSuccess) {
-            $payment = Payment::query()->where('charge_id', $orderId)->first();
+
+            $payment = Payment::query()->where('charge_id', $request->input('charge_id'))->first();
 
             if ($payment) {
                 Log::info('iPara Payment Found', [
@@ -116,7 +117,7 @@ class IparaController extends BaseController
                 $payment->status = PaymentStatusEnum::COMPLETED;
                 $payment->save();
 
-                do_action(PAYMENT_ACTION_PAYMENT_PROCESSED, $payment);
+             //   do_action(PAYMENT_ACTION_PAYMENT_PROCESSED, $payment);
 
                 Log::info('iPara Payment Successfully Updated', ['new_status' => $payment->status]);
 
@@ -147,9 +148,12 @@ class IparaController extends BaseController
             ->with('error_msg', __('Payment failed!'));
     }
 
+
     public function process(Request $request)
     {
         Log::info('-----------Process starting-----------');
+
+        Log::info($request->all());
 
         try {
             $publicKey = get_payment_setting('public_key', IPARA_PAYMENT_METHOD_NAME);
@@ -247,6 +251,7 @@ class IparaController extends BaseController
                 'cardCvc' => $cardCvc,
                 'userId' => '',
                 'cardId' => '',
+                'checkout_token' => $checkoutToken,
                 'installment' => $installment,
                 'amount' => $amount,
                 'echo' => 'Echo',
