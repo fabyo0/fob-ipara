@@ -4,23 +4,18 @@ namespace Botble\Ipara\Providers;
 
 use Botble\Base\Facades\Html;
 use Botble\Ecommerce\Models\Currency as CurrencyEcommerce;
-use Botble\Hotel\Models\Booking;
 use Botble\Hotel\Models\Currency as CurrencyHotel;
+use Botble\Ipara\Forms\IparaPaymentMethodForm;
+use Botble\Ipara\Services\Gateways\IparaPaymentService;
 use Botble\JobBoard\Models\Currency as CurrencyJobBoard;
 use Botble\Payment\Enums\PaymentMethodEnum;
 use Botble\Payment\Facades\PaymentMethods;
-use Botble\Payment\Supports\PaymentHelper;
 use Botble\RealEstate\Models\Currency as CurrencyRealEstate;
-use Botble\Ipara\Forms\IparaPaymentMethodForm;
-use Botble\Ipara\Services\Gateways\IparaPaymentService;
-use Botble\Ipara\IparaSdk\Helper;
 use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Throwable;
-use Illuminate\Support\Facades\Log;
 
 class HookServiceProvider extends ServiceProvider
 {
@@ -36,7 +31,7 @@ class HookServiceProvider extends ServiceProvider
 
         add_filter(PAYMENT_FILTER_AFTER_POST_CHECKOUT, function (array $data, Request $request) {
 
-            if (!isset($data['type']) || $data['type'] != IPARA_PAYMENT_METHOD_NAME) {
+            if (! isset($data['type']) || $data['type'] != IPARA_PAYMENT_METHOD_NAME) {
                 return $data;
             }
 
@@ -46,7 +41,6 @@ class HookServiceProvider extends ServiceProvider
             $supportedCurrencies = $this->app->make(IparaPaymentService::class)->supportedCurrencyCodes();
 
             $checkoutToken = $request->input('checkout_token') ?? session('checkout_token') ?? '';
-
 
             if (in_array(strtoupper($currentCurrency->title), $supportedCurrencies)) {
                 $paymentData['currency'] = strtoupper($currentCurrency->title);
@@ -77,7 +71,7 @@ class HookServiceProvider extends ServiceProvider
                 }
             }
 
-            if (!in_array($paymentData['currency'], $supportedCurrencies)) {
+            if (! in_array($paymentData['currency'], $supportedCurrencies)) {
                 $data['error'] = true;
                 $data['message'] = __(":name doesn't support :currency. List of currencies supported by :name: :currencies.", ['name' => 'iPara', 'currency' => $data['currency'], 'currencies' => implode(', ', $supportedCurrencies)]);
 
@@ -96,7 +90,6 @@ class HookServiceProvider extends ServiceProvider
                 $publicKey = get_payment_setting('public_key', IPARA_PAYMENT_METHOD_NAME);
                 $privateKey = get_payment_setting('private_key', IPARA_PAYMENT_METHOD_NAME);
                 $mode = get_payment_setting('mode', IPARA_PAYMENT_METHOD_NAME) ? 'T' : 'P';
-
 
                 $amount = intval($paymentData['amount'] * 100);
                 $orderId = sprintf(
@@ -134,6 +127,7 @@ class HookServiceProvider extends ServiceProvider
                 if ($result['error']) {
                     $data['error'] = true;
                     $data['message'] = $result['message'];
+
                     return $data;
                 }
 
@@ -150,7 +144,7 @@ class HookServiceProvider extends ServiceProvider
                         'productCode' => 'URN' . ($product['id'] ?? '0'),
                         'productName' => $product['name'],
                         'quantity' => $product['qty'],
-                        'price' => intval($product['price'] * 100)
+                        'price' => intval($product['price'] * 100),
                     ];
                 }
 
@@ -159,7 +153,7 @@ class HookServiceProvider extends ServiceProvider
                     'orderId' => $orderId,
                     'ORDER_ID' => $orderId,
                     'RESULT' => '1',
-                    'checkout_token' => $checkoutToken
+                    'checkout_token' => $checkoutToken,
                 ]);
 
                 $failUrl = route('payments.ipara.callback', [
@@ -167,14 +161,13 @@ class HookServiceProvider extends ServiceProvider
                     'orderId' => $orderId,
                     'ORDER_ID' => $orderId,
                     'RESULT' => '0',
-                    'checkout_token' => $checkoutToken
+                    'checkout_token' => $checkoutToken,
                 ]);
-
 
                 Log::info('iPara Payment URLs', [
                     'successUrl' => $successUrl,
                     'failUrl' => $failUrl,
-                    'checkout_token' => $request->input('checkout_token')
+                    'checkout_token' => $request->input('checkout_token'),
                 ]);
 
                 echo view('plugins/ipara::ipara', [
@@ -193,7 +186,7 @@ class HookServiceProvider extends ServiceProvider
                     'phone' => $phone,
                     'address' => $address,
                     'charge_id' => $result['charge_id'],
-                    'paymentData' => $paymentData
+                    'paymentData' => $paymentData,
                 ])->render();
                 exit;
 

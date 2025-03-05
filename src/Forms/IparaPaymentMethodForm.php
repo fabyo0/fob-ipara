@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Botble\Ipara\Forms;
 
-use Botble\Payment\Forms\PaymentMethodForm;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Forms\FieldOptions\OnOffFieldOption;
 use Botble\Base\Forms\FieldOptions\TextFieldOption;
 use Botble\Base\Forms\Fields\OnOffCheckboxField;
 use Botble\Base\Forms\Fields\TextField;
+use Botble\Payment\Forms\PaymentMethodForm;
 
 class IparaPaymentMethodForm extends PaymentMethodForm
 {
