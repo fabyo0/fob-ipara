@@ -42,11 +42,6 @@ class IparaPaymentService extends IparaPaymentAbstract
             $privateKey = get_payment_setting('private_key', IPARA_PAYMENT_METHOD_NAME);
             $mode = get_payment_setting('mode', IPARA_PAYMENT_METHOD_NAME) ? 'T' : 'P';
 
-            Log::info('iPara storeLocalPayment METADATA', [
-                'checkout_token' => Arr::get($paymentData, 'checkout_token', 'NONE'),
-                'metadata' => ['checkout_token' => Arr::get($paymentData, 'checkout_token')],
-            ]);
-
             $orderIds = (array) $orderIds;
             $this->storeLocalPayment([
                 'amount' => $amount,

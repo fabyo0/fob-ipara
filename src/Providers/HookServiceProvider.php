@@ -166,13 +166,6 @@ class HookServiceProvider extends ServiceProvider
                     'charge_id' => $result['charge_id']
                 ]);
 
-                Log::info('iPara Payment URLs', [
-                    'successUrl' => $successUrl,
-                    'failUrl' => $failUrl,
-                    'checkout_token' => $request->input('checkout_token'),
-                ]);
-
-
                 echo view('plugins/ipara::ipara', [
                     'publicKey' => $publicKey,
                     'privateKey' => $privateKey,

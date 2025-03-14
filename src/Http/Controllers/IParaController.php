@@ -16,8 +16,6 @@ class IparaController extends BaseController
 {
     public function webhook(Request $request)
     {
-        Log::info('iPara Webhook', $request->all());
-
         $publicKey = get_payment_setting('public_key', IPARA_PAYMENT_METHOD_NAME);
         $privateKey = get_payment_setting('private_key', IPARA_PAYMENT_METHOD_NAME);
 
@@ -64,15 +62,6 @@ class IparaController extends BaseController
 
     public function callback(Request $request)
     {
-        Log::info('iPara Callback Received', [
-            'full_url' => $request->fullUrl(),
-            'method' => $request->method(),
-            'all_params' => $request->all(),
-            'headers' => $request->header(),
-            'path' => $request->path(),
-            'body' => $request->getContent(),
-        ]);
-
         $orderId = $request->input('orderId') ?? $request->input('ORDER_ID') ?? '';
         $result = $request->input('result') ?? $request->input('RESULT') ?? '';
         $checkoutToken = $request->input('checkout_token');
@@ -82,18 +71,7 @@ class IparaController extends BaseController
         $errorCode = $request->input('ERROR_CODE');
         $errorMessage = $request->input('ERROR_MESSAGE');
 
-        Log::info('iPara Callback Parameters', [
-            'orderId' => $orderId,
-            'result' => $result,
-            'echo' => $echo,
-            'hash' => $hash,
-            'errorCode' => $errorCode,
-            'errorMessage' => $errorMessage,
-            'checkoutToken' => $checkoutToken,
-        ]);
-
         if (empty($orderId)) {
-            Log::error('iPara Callback: OrderId not found');
 
             return redirect(PaymentHelperSupport::getCancelURL() ?: route('public.index'))
                 ->with('error_msg', __('Payment failed: Order ID not found!'));
@@ -101,32 +79,23 @@ class IparaController extends BaseController
 
         $isSuccess = ($result === 'success' || $result === '1' || $result == 1);
 
-        Log::info('iPara Success Status', ['isSuccess' => $isSuccess, 'result' => $result]);
-
         if ($isSuccess) {
 
             $payment = Payment::query()->where('charge_id', $request->input('charge_id'))->first();
 
             if ($payment) {
-                Log::info('iPara Payment Found', [
-                    'id' => $payment->id,
-                    'current_status' => $payment->status,
-                    'metadata' => $payment->metadata,
-                ]);
 
                 $payment->status = PaymentStatusEnum::COMPLETED;
                 $payment->save();
 
              //   do_action(PAYMENT_ACTION_PAYMENT_PROCESSED, $payment);
 
-                Log::info('iPara Payment Successfully Updated', ['new_status' => $payment->status]);
 
                 if (empty($checkoutToken) && $payment->metadata && isset($payment->metadata['checkout_token'])) {
                     $checkoutToken = $payment->metadata['checkout_token'];
                 }
 
                 if ($checkoutToken) {
-                    Log::info('iPara Redirecting with checkout token', ['token' => $checkoutToken]);
 
                     return redirect(url("checkout/{$checkoutToken}/success"))
                         ->with('success_msg', __('Checkout successfully!'));
@@ -151,10 +120,6 @@ class IparaController extends BaseController
 
     public function process(Request $request)
     {
-        Log::info('-----------Process starting-----------');
-
-        Log::info($request->all());
-
         try {
             $publicKey = get_payment_setting('public_key', IPARA_PAYMENT_METHOD_NAME);
             $privateKey = get_payment_setting('private_key', IPARA_PAYMENT_METHOD_NAME);
