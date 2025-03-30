@@ -28,7 +28,7 @@ iPara Payment Gateway integration for Botble platforms. This plugin provides sea
 
 ### Manual Installation
 
-1. Download the latest release from the [releases page](https://github.com/your-username/botble-ipara/releases)
+1. Download the latest release from the [releases page](https://github.com/fabyo0/fob-ipara/releases/tag/v1.0.0)
 2. Extract the downloaded zip file
 3. Upload the extracted files to the `/platform/plugins/ipara` directory of your Botble installation
 4. Activate the plugin through the 'Plugins' menu in Botble admin panel
